@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS Serverless Jersey API - my.service::jersey-sample
+Outputs:
+  JerseySampleApi:
+    Description: URL for application
+    Export:
+      Name: JerseySampleApi
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/server/server
+Resources:
+  JerseySampleFunction:
+    Properties:
+      CodeUri: s3://edu.neu.bsds/7e58dc258d4743a7ddece68b487a05bb
+      Events:
+        GetResource:
+          Properties:
+            Method: any
+            Path: /{proxy+}
+          Type: Api
+      Handler: my.service.StreamLambdaHandler::handleRequest
+      MemorySize: 512
+      Policies: AWSLambdaBasicExecutionRole
+      Runtime: java8
+      Timeout: 15
+    Type: AWS::Serverless::Function
+Transform: AWS::Serverless-2016-10-31
