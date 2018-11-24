@@ -27,16 +27,16 @@ public class DataProcess {
 
         BufferedReader[] brs = new BufferedReader[4];
 
-        File file = new File("./a3/gcp/256/warmup.txt");
+        File file = new File("./a3/lambda/32/warmup.txt");
         brs[0] = new BufferedReader(new FileReader(file));
 
-        file = new File("./a3/gcp/256/loading.txt");
+        file = new File("./a3/lambda/32/loading.txt");
         brs[1] = new BufferedReader(new FileReader(file));
 
-        file = new File("./a3/gcp/256/peak.txt");
+        file = new File("./a3/lambda/32/peak.txt");
         brs[2] = new BufferedReader(new FileReader(file));
 
-        file = new File("./a3/gcp/256/cooldown.txt");
+        file = new File("./a3/lambda/32/cooldown.txt");
         brs[3] = new BufferedReader(new FileReader(file));
 
         String str;
@@ -70,8 +70,15 @@ public class DataProcess {
             counts[bucket]++;
         }
 
+        String plotTitle = "max 32 threads with lambda";
+        String plotImage1 = "32_tps_lambda.png";
+        String plotImage2 = "32_latency_lambda.png";
+
         obj.statistics(latencies, maxBucket);
-        obj.plot(counts);
+        obj.plotThroughput(counts, plotTitle, plotImage1);
+
+        Double[] latenciesArr = new Double[latencies.size()];
+        obj.plotLatency(latencies.toArray(latenciesArr), plotTitle, plotImage2);
 
     }
 
@@ -85,7 +92,7 @@ public class DataProcess {
 
         double throughput = list.size()/maxBucket;
 
-        System.out.println("max 256 threads with gcp");
+        System.out.println("max 32 threads with lambda");
         System.out.println("=================================");
         System.out.println("total requests: " + list.size());
         System.out.println("wall time: " + maxBucket + " seconds");
@@ -109,9 +116,9 @@ public class DataProcess {
         System.out.println("99th percentile latencies: " + Math.round(percentile99) + " ms");
     }
 
-    public void plot(int[] counts) throws Exception {
-        String plotTitle = "max 256 threads with gcp";
-        String plotImage = "256_gcp.png";
+    public void plotThroughput(int[] counts, String plotTitle, String plotImage) throws Exception {
+        //String plotTitle = "max 32 threads with gcp lb";
+        //String plotImage = "32_gcp_lb.png";
 
         int maxBucket = counts.length;
 
@@ -126,7 +133,33 @@ public class DataProcess {
         JFreeChart chart = ChartFactory.createXYLineChart(
                 plotTitle,
                 "Second bucket",
-                "Number of requests fired",
+                "Throughput",
+                dataset,
+                PlotOrientation.VERTICAL,
+                false,
+                true,
+                false
+        );
+        ChartUtilities.saveChartAsPNG(new File(plotImage), chart, 1000, 600);
+        //ChartUtilities.saveChartAsPNG(new File(plotImage), chart, 800, 500);
+    }
+
+    public void plotLatency(Double[] latencies, String plotTitle, String plotImage) throws Exception {
+        //String plotTitle = "max 32 threads with gcp lb";
+        //String plotImage = "32_gcp_lb.png";
+
+        XYSeries series1 = new XYSeries(plotTitle);
+        for (int i = 0; i < latencies.length; i++) {
+            series1.add(i, latencies[i]);
+        }
+
+        XYSeriesCollection dataset = new XYSeriesCollection();
+        dataset.addSeries(series1);
+
+        JFreeChart chart = ChartFactory.createXYLineChart(
+                plotTitle,
+                "Time",
+                "Latency",
                 dataset,
                 PlotOrientation.VERTICAL,
                 false,

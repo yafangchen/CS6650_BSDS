@@ -40,11 +40,13 @@ public class Worker implements Runnable {
     public void run() {
         Client c = ClientBuilder.newClient();
         WebTarget webTarget = c.target(base_url);
-        //BlockingQueue queue = new ArrayBlockingQueue(2014);
-        //CollectWorker collectWorker = new CollectWorker(queue, phase + ".txt");
-        //Thread t1 = new Thread(collectWorker);
-        //t1.start();
 
+        /*
+        BlockingQueue queue = new ArrayBlockingQueue(2014);
+        CollectWorker collectWorker = new CollectWorker(queue, phase + ".txt");
+        Thread t1 = new Thread(collectWorker);
+        t1.start();
+        */
         for (int i = 0; i < iterNum; i++) {
 
             /*
@@ -97,7 +99,7 @@ public class Worker implements Runnable {
                 //System.out.println(latency4);
                 //System.out.println(latency5);
 
-                if (req != successReq) System.out.println("there is unsuccessful request");
+                //if (req != successReq) System.out.println("there is unsuccessful request");
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -27,6 +27,7 @@ public class Main {
         // http://localhost:8080
         // lambda: https://2jz3moy4x5.execute-api.us-west-2.amazonaws.com/Prod
         // gcp instance: http://35.230.53.82:8080/Server2
+        // gcp load balancer: http://35.244.134.122:8080/Server2
         String base_url = args[1];
         int day = Integer.parseInt(args[2]);
         int userBound = Integer.parseInt(args[3]);
@@ -110,25 +111,28 @@ public class Main {
         long startTime = System.currentTimeMillis();
         System.out.println(phase + " phase: All threads running ....");
         int req = 0, successReq = 0;
+
         BlockingQueue queue = new ArrayBlockingQueue(2014);
         WriteWorker writeWorker = new WriteWorker(queue, phase + ".txt");
         Thread t1 = new Thread(writeWorker);
         t1.start();
 
+        Worker[] workers = new Worker[threadNum];
         for (int i = 0; i < threadNum; i++) {
-            Worker worker = new Worker(queue, base_url, iterNum, userBound, day, stepCountBound,
-                    timeInterval1, timeInterval2);
-            executor.execute(worker);
 
-            //req += worker.getReq();
-            //successReq += worker.getSuccessReq();
+            workers[i] = new Worker(queue, base_url, iterNum, userBound, day, stepCountBound,
+                    timeInterval1, timeInterval2);
+            executor.execute(workers[i]);
+
+            req += workers[i].getReq();
+            successReq += workers[i].getSuccessReq();
         }
         executor.shutdown();
         while (!executor.isTerminated()) {
         }
         long endTime = System.currentTimeMillis();
         System.out.println(phase + " phase complete: Time " + (endTime - startTime) / 1000.0 + " seconds");
-
+        System.out.println(Math.round(successReq*1.0/req));
         //System.out.println("req: " + req);
         //System.out.println("successReq: " + successReq);
 
